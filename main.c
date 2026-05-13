@@ -9,22 +9,26 @@ typedef struct {
     float kolicina;
 } Meso;
 
-// PROTOTIPI FUNKCIJA
+// FUNKCIJE
 void dodajMeso();
 void ispisiMeso();
 void urediMeso();
+void obrisiMeso();
 
 int main() {
+
+    //IZBORNIK
 
     int izbor;
 
     do {
 
         printf("\n===== EVIDENCIJA MESA =====\n");
-        printf("1. Dodaj meso\n");
-        printf("2. Ispisi meso\n");
-        printf("3. Uredi meso\n");
-        printf("0. Izlaz\n");
+        printf("||--1. Dodaj meso\n--||");
+        printf("||--2. Ispisi meso\n--||");
+        printf("||--3. Uredi meso\n--||");
+        printf("||--4. Obrisi meso\n--||");
+        printf("||--0. Izlaz\n--||");
         printf("Odabir: ");
 
         scanf("%d", &izbor);
@@ -42,7 +46,9 @@ int main() {
         case 3:
             urediMeso();
             break;
-
+        case 4:
+            obrisiMeso();
+            break;
         case 0:
             printf("Izlaz iz programa.\n");
             break;
@@ -56,7 +62,7 @@ int main() {
     return 0;
 }
 
-// DODAVANJE MESA
+//DODAVANJE MESA
 void dodajMeso() {
 
     FILE* fp = fopen("meso.dat", "ab");
@@ -90,7 +96,7 @@ void dodajMeso() {
     fclose(fp);
 }
 
-// ISPIS MESA
+//ISPIS MESA
 void ispisiMeso() {
 
     FILE* fp = fopen("meso.dat", "rb");
@@ -108,14 +114,14 @@ void ispisiMeso() {
 
         printf("\nID: %d", m.id);
         printf("\nNaziv: %s", m.naziv);
-        printf("\nCijena: %.2f", m.cijena);
+        printf("\nCijena: %.2f €", m.cijena);
         printf("\nKolicina: %.2f kg\n", m.kolicina);
     }
 
     fclose(fp);
 }
 
-// UREDIVANJE MESA
+//UREDIVANJE MESA
 void urediMeso() {
 
     FILE* fp = fopen("meso.dat", "rb+");
@@ -147,14 +153,8 @@ void urediMeso() {
             scanf("%f", &m.kolicina);
 
             fseek(fp, -sizeof(Meso), SEEK_CUR);
-
-            if (fwrite(&m, sizeof(Meso), 1, fp) != 1) {
-                perror("Greska pri izmjeni");
-            }
-            else {
-                printf("Meso uspjesno uredeno!\n");
-            }
-
+            fwrite(&m, sizeof(Meso), 1, fp);
+            printf("Meso uspjesno uredeno!\n");
             pronaden = 1;
             break;
         }
@@ -165,4 +165,40 @@ void urediMeso() {
     }
 
     fclose(fp);
+
+}
+//BRISANJE MESA
+void obrisiMeso() {
+    FILE* fp = fopen("meso.dat", "rb");
+    FILE* temp = fopen("temp.dat", "wb");
+    if (fp == NULL || temp==NULL) {
+        printf("Greska pri otvaranju");
+        return;
+    }
+    int trazeniID;
+    int pronaden;
+    Meso m;
+    printf("Unesi ID mesa za brisanje:");
+    scanf("%d", &trazeniID);
+    
+    while (fread(&m, sizeof(Meso), 1, fp) == 1) {
+        if (m.id == trazeniID) {
+            pronaden = 1;
+            continue;
+        }
+    fwrite(&m, sizeof(Meso), 1, temp);
+    }
+    fclose(fp);
+    fclose(temp);
+
+    remove("meso.dat");
+    rename("temp.dat", "meso.dat");
+
+    if (pronaden) {
+        printf("Meso uspjesno obrisano!\n");
+    }
+    else {
+        printf("Meso nije pronadeno!\n");
+    }
+
 }
