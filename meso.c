@@ -3,9 +3,12 @@
 #include <stdlib.h>
 #include "meso.h"
 
-// DODAJ
+//6
+static const char* FILE_NAME = "meso.dat";
+
+// DODAJ (CRUD, 19)
 void dodajMeso() {
-    FILE* fp = fopen("meso.dat", "ab");
+    FILE* fp = fopen(FILE_NAME, "ab");
     if (!fp) return;
 
     Meso m;
@@ -13,14 +16,33 @@ void dodajMeso() {
     printf("ID: ");
     scanf("%d", &m.id);
 
+    //14
+    if (m.id<=0) {
+        printf("Neispravan ID!\n");
+        fclose(fp);
+      
+    }
+
     printf("Naziv: ");
     scanf("%49s", m.naziv);
 
     printf("Cijena: ");
     scanf("%f", &m.cijena);
 
+    if (m.id <= 0) {
+        printf("Neispravna cijena!\n");
+        fclose(fp);
+
+    }
+
     printf("Kolicina: ");
     scanf("%f", &m.kolicina);
+
+    if (m.id <= 0) {
+        printf("Kolicina neispravna!\n");
+        fclose(fp);
+
+    }
 
     fwrite(&m, sizeof(Meso), 1, fp);
     fclose(fp);
@@ -28,7 +50,7 @@ void dodajMeso() {
 
 // ISPIS
 void ispisiMeso() {
-    FILE* fp = fopen("meso.dat", "rb");
+    FILE* fp = fopen(FILE_NAME, "rb");
     if (!fp) return;
 
     Meso m;
@@ -43,9 +65,9 @@ void ispisiMeso() {
     fclose(fp);
 }
 
-// UREDI
+// UREDI (20)
 void urediMeso() {
-    FILE* fp = fopen("meso.dat", "rb+");
+    FILE* fp = fopen(FILE_NAME, "rb+");
     if (!fp) return;
 
     int id;
@@ -80,9 +102,9 @@ void urediMeso() {
         printf("Nije pronadeno\n");
 }
 
-// IZBRISI
+// IZBRISI (21)
 void obrisiMeso() {
-    FILE* fp = fopen("meso.dat", "rb");
+    FILE* fp = fopen(FILE_NAME, "rb");
     FILE* temp = fopen("temp.dat", "wb");
 
     if (!fp || !temp) return;
@@ -105,13 +127,46 @@ void obrisiMeso() {
     fclose(fp);
     fclose(temp);
 
-    remove("meso.dat");
-    rename("temp.dat", "meso.dat");
+    remove(FILE_NAME);
+    rename("temp.dat", FILE_NAME);
 
     if (pronaden)
         printf("Obrisano!\n");
     else
         printf("Nije pronadeno!\n");
 
+}
+//23 26
+int usporediPoCijeni(const void* a, const void* b) {
 
+    Meso* m1 = (Meso*)a;
+    Meso* m2 = (Meso*)b;
+
+    if (m1->cijena > m2->cijena) return 1;
+    if (m1->cijena < m2->cijena) return -1;
+    return 0;
+}
+//16 17 20 23
+void sortirajPoCijeni() {
+    FILE* fp = fopen(FILE_NAME, "rb");
+    if (!fp) return;
+
+    fseek(fp, 0, SEEK_END);
+    int n = ftell(fp) / sizeof(Meso);
+    rewind(fp);
+    Meso* niz = (Meso*)malloc(n * sizeof(Meso));
+    fread(niz, sizeof(Meso), n, fp);
+    fclose(fp);
+    //23
+    qsort(niz, n, sizeof(Meso), usporediPoCijeni);
+    printf("\n======SORITRANO PO CIJENI======");
+
+    for (int i = 0; i < n; i++) {
+        printf("\n%d | %s | %.2f | %.2f\n", niz[i].id, 
+            niz[i].naziv, 
+            niz[i].cijena, 
+            niz[i].kolicina);
+    }
+    //18
+    free(niz);
 }
