@@ -155,6 +155,10 @@ void sortirajPoCijeni() {
     int n = ftell(fp) / sizeof(Meso);
     rewind(fp);
     Meso* niz = (Meso*)malloc(n * sizeof(Meso));
+     if (niz == NULL) {
+        printf("Greska: nema dovoljno memorije");
+        return;
+    }
     fread(niz, sizeof(Meso), n, fp);
     fclose(fp);
     //23
