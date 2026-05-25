@@ -11,8 +11,10 @@ typedef struct {
 // funkcije (12 19)
 void dodajMeso();
 void ispisiMeso();
+void ispisiRekurzivno(FILE* fp);
 void urediMeso();
 void obrisiMeso();
 void sortirajPoCijeni();
+void pretraziMeso();
 
 #endif

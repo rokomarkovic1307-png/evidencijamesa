@@ -8,8 +8,9 @@ enum Izbornik {
     ISPISI = 2,
     UREDI = 3,
     OBRISI = 4,
-    SORTIRAJ = 5
-    
+    SORTIRAJ = 5,
+    PRETRAZI = 6
+
 };
 //7
 int main() {
@@ -23,6 +24,7 @@ int main() {
         printf("3. Uredi\n");
         printf("4. Obrisi\n");
         printf("5. Sortiraj po cijeni\n");
+        printf("6. Pretrazi meso\n");
         printf("0. Izlaz\n");
 
         printf("Odabir: ");
@@ -48,6 +50,10 @@ int main() {
 
         case SORTIRAJ:
             sortirajPoCijeni();
+            break;
+
+        case PRETRAZI:
+            pretraziMeso();
             break;
 
         case IZLAZ:

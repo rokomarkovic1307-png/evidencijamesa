@@ -17,10 +17,11 @@ void dodajMeso() {
     scanf("%d", &m.id);
 
     //14
-    if (m.id<=0) {
+    if (m.id <= 0) {
         printf("Neispravan ID!\n");
         fclose(fp);
-      
+        return;
+
     }
 
     printf("Naziv: ");
@@ -29,7 +30,7 @@ void dodajMeso() {
     printf("Cijena: ");
     scanf("%f", &m.cijena);
 
-    if (m.id <= 0) {
+    if (m.cijena <= 0) {
         printf("Neispravna cijena!\n");
         fclose(fp);
 
@@ -38,7 +39,7 @@ void dodajMeso() {
     printf("Kolicina: ");
     scanf("%f", &m.kolicina);
 
-    if (m.id <= 0) {
+    if (m.kolicina <= 0) {
         printf("Kolicina neispravna!\n");
         fclose(fp);
 
@@ -56,15 +57,24 @@ void ispisiMeso() {
     Meso m;
 
     while (fread(&m, sizeof(Meso), 1, fp) == 1) {
-        printf("\nID: %d", m.id);
-        printf("\nNaziv: %s", m.naziv);
-        printf("\nCijena: %.2f", m.cijena);
-        printf("\nKolicina: %.2f\n", m.kolicina);
+        printf("\n%d | %s | %.2f | %.2f",
+            m.id, m.naziv, m.cijena, m.kolicina);
     }
 
     fclose(fp);
 }
+void ispisiRekurzivno(FILE* fp) {
 
+    Meso m;
+
+    if (fread(&m, sizeof(Meso), 1, fp) != 1)
+        return; // STOP uvjet
+
+    printf("\n%d | %s | %.2f | %.2f",
+        m.id, m.naziv, m.cijena, m.kolicina);
+
+    ispisiRekurzivno(fp);
+}
 // UREDI (20)
 void urediMeso() {
     FILE* fp = fopen(FILE_NAME, "rb+");
@@ -155,8 +165,9 @@ void sortirajPoCijeni() {
     int n = ftell(fp) / sizeof(Meso);
     rewind(fp);
     Meso* niz = (Meso*)malloc(n * sizeof(Meso));
-     if (niz == NULL) {
+    if (niz == NULL) {
         printf("Greska: nema dovoljno memorije");
+        fclose(fp);
         return;
     }
     fread(niz, sizeof(Meso), n, fp);
@@ -166,11 +177,76 @@ void sortirajPoCijeni() {
     printf("\n======SORITRANO PO CIJENI======");
 
     for (int i = 0; i < n; i++) {
-        printf("\n%d | %s | %.2f | %.2f\n", niz[i].id, 
-            niz[i].naziv, 
-            niz[i].cijena, 
+        printf("\n%d | %s | %.2f | %.2f\n", niz[i].id,
+            niz[i].naziv,
+            niz[i].cijena,
             niz[i].kolicina);
     }
     //18
     free(niz);
+    niz = NULL;
+}
+int cmpPoId(const void* a, const void* b) {
+    Meso* m1 = (Meso*)a;
+    Meso* m2 = (Meso*)b;
+
+    if (m1->id > m2->id) return 1;
+    if (m1->id < m2->id) return -1;
+    return 0;
+}
+
+void pretraziMeso() {
+
+    FILE* fp = fopen(FILE_NAME, "rb");
+    if (!fp) {
+        perror("Greska");
+        return;
+    }
+
+    fseek(fp, 0, SEEK_END);
+    int n = ftell(fp) / sizeof(Meso);
+    rewind(fp);
+
+    Meso* niz = malloc(n * sizeof(Meso));
+
+    if (!niz) {
+        fclose(fp);
+        return;
+    }
+
+    fread(niz, sizeof(Meso), n, fp);
+    fclose(fp);
+
+    // mora biti SORTIRANO po ID
+    qsort(niz, n, sizeof(Meso), cmpPoId);
+
+    int trazeniId;
+    printf("Unesi ID: ");
+    scanf("%d", &trazeniId);
+
+    Meso kljuc;
+    kljuc.id = trazeniId;
+
+    Meso* rezultat = bsearch(
+        &kljuc,
+        niz,
+        n,
+        sizeof(Meso),
+        cmpPoId
+    );
+
+    if (rezultat) {
+        printf("\nPRONADENO:\n");
+        printf("%d %s %.2f %.2f\n",
+            rezultat->id,
+            rezultat->naziv,
+            rezultat->cijena,
+            rezultat->kolicina);
+    }
+    else {
+        printf("Nije pronadeno!\n");
+    }
+
+    free(niz);
+    niz = NULL;
 }
