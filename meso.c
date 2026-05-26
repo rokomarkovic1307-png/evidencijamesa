@@ -2,11 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "meso.h"
+#include "globals.h"
 
-//6
-static const char* FILE_NAME = "meso.dat";
-
-// DODAJ (CRUD, 19)
 void dodajMeso() {
     FILE* fp = fopen(FILE_NAME, "ab");
     if (!fp) return;
@@ -48,17 +45,19 @@ void dodajMeso() {
     fwrite(&m, sizeof(Meso), 1, fp);
     fclose(fp);
 }
+static void ispisiNaslov() {
+    printf("\n=====POPIS MESA======\n");
+}
 
-// ISPIS
 void ispisiMeso() {
     FILE* fp = fopen(FILE_NAME, "rb");
     if (!fp) return;
 
     Meso m;
-
+    ispisiNaslov();
     while (fread(&m, sizeof(Meso), 1, fp) == 1) {
-        printf("\n%d | %s | %.2f | %.2f",
-            m.id, m.naziv, m.cijena, m.kolicina);
+        printf("\n%d | %s | %.2f | %.2f | %.2f",
+            m.id, m.naziv, m.cijena, m.kolicina,vrijednost(m));
     }
 
     fclose(fp);
@@ -75,7 +74,7 @@ void ispisiRekurzivno(FILE* fp) {
 
     ispisiRekurzivno(fp);
 }
-// UREDI (20)
+
 void urediMeso() {
     FILE* fp = fopen(FILE_NAME, "rb+");
     if (!fp) return;

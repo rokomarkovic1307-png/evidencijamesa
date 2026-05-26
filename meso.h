@@ -1,14 +1,16 @@
 #ifndef MESO_H
 #define MESO_H
-//2 3 4
+
+#define MAX_NAZIV 50
 typedef struct {
     int id;
-    char naziv[50];
+    char naziv[MAX_NAZIV];
     float cijena;
     float kolicina;
 } Meso;
 
-// funkcije (12 19)
+
+
 void dodajMeso();
 void ispisiMeso();
 void ispisiRekurzivno(FILE* fp);
@@ -16,5 +18,9 @@ void urediMeso();
 void obrisiMeso();
 void sortirajPoCijeni();
 void pretraziMeso();
+
+static inline float vrijednost(Meso m) {
+    return m.cijena * m.kolicina;
+}
 
 #endif
