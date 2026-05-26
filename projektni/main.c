@@ -1,7 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include "meso.h"
-//10 11
+
 enum Izbornik {
     IZLAZ = 0,
     DODAJ = 1,
@@ -12,11 +12,11 @@ enum Izbornik {
     PRETRAZI = 6
 
 };
-//7
+
 int main() {
 
     int izbor;
-    //10
+    
     do {
         printf("\n===== EVIDENCIJA MESA =====\n");
         printf("1. Dodaj\n");
