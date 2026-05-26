@@ -13,7 +13,7 @@ void dodajMeso() {
     printf("ID: ");
     scanf("%d", &m.id);
 
-    //14
+    
     if (m.id <= 0) {
         printf("Neispravan ID!\n");
         fclose(fp);
@@ -111,7 +111,7 @@ void urediMeso() {
         printf("Nije pronadeno\n");
 }
 
-// IZBRISI (21)
+
 void obrisiMeso() {
     FILE* fp = fopen(FILE_NAME, "rb");
     FILE* temp = fopen("temp.dat", "wb");
@@ -145,7 +145,7 @@ void obrisiMeso() {
         printf("Nije pronadeno!\n");
 
 }
-//23 26
+
 int usporediPoCijeni(const void* a, const void* b) {
 
     Meso* m1 = (Meso*)a;
@@ -155,7 +155,7 @@ int usporediPoCijeni(const void* a, const void* b) {
     if (m1->cijena < m2->cijena) return -1;
     return 0;
 }
-//16 17 20 23
+
 void sortirajPoCijeni() {
     FILE* fp = fopen(FILE_NAME, "rb");
     if (!fp) return;
@@ -181,7 +181,7 @@ void sortirajPoCijeni() {
             niz[i].cijena,
             niz[i].kolicina);
     }
-    //18
+    
     free(niz);
     niz = NULL;
 }
