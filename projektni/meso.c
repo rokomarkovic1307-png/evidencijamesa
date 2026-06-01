@@ -1,6 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "meso.h"
 #include "globals.h"
 
@@ -11,42 +12,39 @@ void dodajMeso() {
     Meso m;
 
     printf("ID: ");
-    scanf("%d", &m.id);
+    if (scanf("%d", &m.id) != 1) { fclose(fp); return; }
 
-    
     if (m.id <= 0) {
         printf("Neispravan ID!\n");
         fclose(fp);
         return;
-
     }
 
     printf("Naziv: ");
     scanf("%49s", m.naziv);
 
     printf("Cijena: ");
-    scanf("%f", &m.cijena);
+    if (scanf("%f", &m.cijena) != 1) { fclose(fp); return; }
 
     if (m.cijena <= 0) {
         printf("Neispravna cijena!\n");
         fclose(fp);
         return;
-
     }
 
     printf("Kolicina: ");
-    scanf("%f", &m.kolicina);
+    if (scanf("%f", &m.kolicina) != 1) { fclose(fp); return; }
 
     if (m.kolicina <= 0) {
         printf("Kolicina neispravna!\n");
         fclose(fp);
         return;
-
     }
 
     fwrite(&m, sizeof(Meso), 1, fp);
     fclose(fp);
 }
+
 static void ispisiNaslov() {
     printf("\n=====POPIS MESA======\n");
 }
@@ -60,15 +58,20 @@ void ispisiMeso() {
 
     fclose(fp);
 }
-void ispisiRekurzivno(FILE* fp) {
+
+    void ispisiRekurzivno(FILE* fp) {
 
     Meso m;
 
     if (fread(&m, sizeof(Meso), 1, fp) != 1)
         return;
 
-    printf("\n%d | %s | %.2f | %.2f",
-        m.id, m.naziv, m.cijena, m.kolicina);
+    printf("\n%d | %s | %.2f | %.2f | %.2f",
+        m.id,
+        m.naziv,
+        m.cijena,
+        m.kolicina,
+        vrijednost(m));
 
     ispisiRekurzivno(fp);
 }
@@ -82,7 +85,7 @@ void urediMeso() {
     Meso m;
 
     printf("ID za urediti: ");
-    scanf("%d", &id);
+    if (scanf("%d", &id) != 1) { fclose(fp); return; }
 
     while (fread(&m, sizeof(Meso), 1, fp) == 1) {
         if (m.id == id) {
@@ -90,10 +93,10 @@ void urediMeso() {
             scanf("%49s", m.naziv);
 
             printf("Nova cijena: ");
-            scanf("%f", &m.cijena);
+            if (scanf("%f", &m.cijena) != 1) break;
 
             printf("Nova kolicina: ");
-            scanf("%f", &m.kolicina);
+            if (scanf("%f", &m.kolicina) != 1) break;
 
             fseek(fp, -(long)sizeof(Meso), SEEK_CUR);
             fwrite(&m, sizeof(Meso), 1, fp);
@@ -109,19 +112,22 @@ void urediMeso() {
         printf("Nije pronadeno\n");
 }
 
-
 void obrisiMeso() {
     FILE* fp = fopen(FILE_NAME, "rb");
     FILE* temp = fopen("temp.dat", "wb");
 
-    if (!fp || !temp) return;
+    if (!fp || !temp) {
+        if (fp) fclose(fp);
+        if (temp) fclose(temp);
+        return;
+    }
 
     int id;
     int pronaden = 0;
     Meso m;
 
     printf("ID za brisanje: ");
-    scanf("%d", &id);
+    if (scanf("%d", &id) != 1) { fclose(fp); fclose(temp); return; }
 
     while (fread(&m, sizeof(Meso), 1, fp) == 1) {
         if (m.id == id) {
@@ -141,13 +147,12 @@ void obrisiMeso() {
         printf("Obrisano!\n");
     else
         printf("Nije pronadeno!\n");
-
 }
 
 int usporediPoCijeni(const void* a, const void* b) {
 
-    Meso* m1 = (Meso*)a;
-    Meso* m2 = (Meso*)b;
+    const Meso* m1 = (const Meso*)a;
+    const Meso* m2 = (const Meso*)b;
 
     if (m1->cijena > m2->cijena) return 1;
     if (m1->cijena < m2->cijena) return -1;
@@ -159,39 +164,46 @@ void sortirajPoCijeni() {
     if (!fp) return;
 
     fseek(fp, 0, SEEK_END);
-    int n = ftell(fp) / sizeof(Meso);
+    long size = ftell(fp);
+    int n = (int)(size / sizeof(Meso));
     rewind(fp);
     if (n == 0) {
-    printf("Nema podataka.\n");
-    fclose(fp);
-    return;
-}
+        printf("Nema podataka.\n");
+        fclose(fp);
+        return;
+    }
     Meso* niz = (Meso*)malloc(n * sizeof(Meso));
     if (niz == NULL) {
         printf("Greska: nema dovoljno memorije");
         fclose(fp);
         return;
     }
-    fread(niz, sizeof(Meso), n, fp);
+    if (fread(niz, sizeof(Meso), n, fp) != (size_t)n) {
+        printf("Greska pri citanju datoteke.\n");
+        free(niz);
+        fclose(fp);
+        return;
+    }
     fclose(fp);
-    //23
     qsort(niz, n, sizeof(Meso), usporediPoCijeni);
-    printf("\n======SORITRANO PO CIJENI======");
+    printf("\n======SORTEIRANO PO CIJENI======");
 
     for (int i = 0; i < n; i++) {
         printf("\n%d | %s | %.2f | %.2f | %.2f",
-    m.id,
-    m.naziv,
-    m.cijena,
-    m.kolicina,
-    vrijednost(m));
-    
+            niz[i].id,
+            niz[i].naziv,
+            niz[i].cijena,
+            niz[i].kolicina,
+            vrijednost(niz[i]));
+    }
+
     free(niz);
     niz = NULL;
 }
+
 int cmpPoId(const void* a, const void* b) {
-    Meso* m1 = (Meso*)a;
-    Meso* m2 = (Meso*)b;
+    const Meso* m1 = (const Meso*)a;
+    const Meso* m2 = (const Meso*)b;
 
     if (m1->id > m2->id) return 1;
     if (m1->id < m2->id) return -1;
@@ -207,13 +219,14 @@ void pretraziMeso() {
     }
 
     fseek(fp, 0, SEEK_END);
-    int n = ftell(fp) / sizeof(Meso);
+    long size = ftell(fp);
+    int n = (int)(size / sizeof(Meso));
     rewind(fp);
     if (n == 0) {
-    printf("Nema podataka.\n");
-    fclose(fp);
-    return;
-}
+        printf("Nema podataka.\n");
+        fclose(fp);
+        return;
+    }
 
     Meso* niz = malloc(n * sizeof(Meso));
 
@@ -222,17 +235,22 @@ void pretraziMeso() {
         return;
     }
 
-    fread(niz, sizeof(Meso), n, fp);
+    if (fread(niz, sizeof(Meso), n, fp) != (size_t)n) {
+        printf("Greska pri citanju datoteke.\n");
+        free(niz);
+        fclose(fp);
+        return;
+    }
     fclose(fp);
-
 
     qsort(niz, n, sizeof(Meso), cmpPoId);
 
     int trazeniId;
     printf("Unesi ID: ");
-    scanf("%d", &trazeniId);
+    if (scanf("%d", &trazeniId) != 1) { free(niz); return; }
 
     Meso kljuc;
+    memset(&kljuc, 0, sizeof(Meso));
     kljuc.id = trazeniId;
 
     Meso* rezultat = bsearch(
