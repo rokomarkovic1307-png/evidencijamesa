@@ -3,5 +3,5 @@
 
 extern const char* FILE_NAME;
 
-#endif // !GLOBALS_H
+#endif 
 
