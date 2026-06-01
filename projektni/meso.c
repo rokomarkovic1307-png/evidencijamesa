@@ -30,6 +30,7 @@ void dodajMeso() {
     if (m.cijena <= 0) {
         printf("Neispravna cijena!\n");
         fclose(fp);
+        return;
 
     }
 
@@ -39,6 +40,7 @@ void dodajMeso() {
     if (m.kolicina <= 0) {
         printf("Kolicina neispravna!\n");
         fclose(fp);
+        return;
 
     }
 
@@ -53,12 +55,8 @@ void ispisiMeso() {
     FILE* fp = fopen(FILE_NAME, "rb");
     if (!fp) return;
 
-    Meso m;
     ispisiNaslov();
-    while (fread(&m, sizeof(Meso), 1, fp) == 1) {
-        printf("\n%d | %s | %.2f | %.2f | %.2f",
-            m.id, m.naziv, m.cijena, m.kolicina,vrijednost(m));
-    }
+    ispisiRekurzivno(fp);
 
     fclose(fp);
 }
@@ -67,7 +65,7 @@ void ispisiRekurzivno(FILE* fp) {
     Meso m;
 
     if (fread(&m, sizeof(Meso), 1, fp) != 1)
-        return; // STOP uvjet
+        return;
 
     printf("\n%d | %s | %.2f | %.2f",
         m.id, m.naziv, m.cijena, m.kolicina);
@@ -163,6 +161,11 @@ void sortirajPoCijeni() {
     fseek(fp, 0, SEEK_END);
     int n = ftell(fp) / sizeof(Meso);
     rewind(fp);
+    if (n == 0) {
+    printf("Nema podataka.\n");
+    fclose(fp);
+    return;
+}
     Meso* niz = (Meso*)malloc(n * sizeof(Meso));
     if (niz == NULL) {
         printf("Greska: nema dovoljno memorije");
@@ -176,11 +179,12 @@ void sortirajPoCijeni() {
     printf("\n======SORITRANO PO CIJENI======");
 
     for (int i = 0; i < n; i++) {
-        printf("\n%d | %s | %.2f | %.2f\n", niz[i].id,
-            niz[i].naziv,
-            niz[i].cijena,
-            niz[i].kolicina);
-    }
+        printf("\n%d | %s | %.2f | %.2f | %.2f",
+    m.id,
+    m.naziv,
+    m.cijena,
+    m.kolicina,
+    vrijednost(m));
     
     free(niz);
     niz = NULL;
@@ -205,6 +209,11 @@ void pretraziMeso() {
     fseek(fp, 0, SEEK_END);
     int n = ftell(fp) / sizeof(Meso);
     rewind(fp);
+    if (n == 0) {
+    printf("Nema podataka.\n");
+    fclose(fp);
+    return;
+}
 
     Meso* niz = malloc(n * sizeof(Meso));
 
